@@ -1,0 +1,32 @@
+services:
+  authentication-service-database:
+    image: postgres:latest
+    container_name: auth-service-db
+    environment:
+      POSTGRES_USER: developer
+      POSTGRES_DB: auth_db
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    networks:
+      - public
+      - auth-internal
+    volumes:
+      - auth-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U develoepr -d auth_db"]
+      interval: 10s
+      timeout: 20s
+      retries: 5
+      start_period: 20s
+    
+networks:
+
+  public:
+    internal: false
+
+  auth-internal:
+    internal: true  
+
+volumes:
+  auth-db: 
