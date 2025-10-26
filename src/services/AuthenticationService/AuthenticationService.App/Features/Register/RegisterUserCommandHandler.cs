@@ -12,7 +12,9 @@ namespace AuthenticationService.App.Features.Register;
 internal sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<Guid>>
 {
     private readonly AuthServiceContext _context;
+    
     private readonly IPasswordHasher _passwordHasher;
+    
     private readonly ILogger<RegisterUserCommandHandler> _logger;
 
     public RegisterUserCommandHandler(

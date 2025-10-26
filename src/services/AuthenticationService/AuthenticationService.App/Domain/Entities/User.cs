@@ -14,11 +14,13 @@ internal sealed class User
 
     public DateTime RegisteredAt { get; set; }
 
-    public Guid RoleId { get; private set; }
+    public int RoleId { get; private set; }
 
     public Role Role { get; private set; } = null!;
+    
+    public ICollection<RefreshToken> RefreshTokens { get; private set; } = [];
 
-    public User(string email, string login, string hashPassword, string fullName, Guid roleId)
+    public User(string email, string login, string hashPassword, string fullName, int roleId)
     {
         Id = Guid.NewGuid();
         Email = email;

@@ -1,6 +1,6 @@
 ﻿namespace AuthenticationService.App.Domain.ValueTypes;
 
-internal sealed record FullName(string Name, string Surname, string? Patronymic)
+public sealed record FullName(string Name, string Surname, string? Patronymic)
 {
     public override string ToString()
     {

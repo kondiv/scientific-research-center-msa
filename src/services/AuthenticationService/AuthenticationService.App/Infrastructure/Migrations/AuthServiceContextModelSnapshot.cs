@@ -22,11 +22,48 @@ namespace AuthenticationService.App.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.Role", b =>
+            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("token");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("refresh_token", (string)null);
+                });
+
+            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -46,6 +83,26 @@ namespace AuthenticationService.App.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("role", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Scientist",
+                            NormalizedName = "SCIENTIST"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Technical Specialist",
+                            NormalizedName = "TECHNICAL_SPECIALIST"
+                        });
                 });
 
             modelBuilder.Entity("AuthenticationService.App.Domain.Entities.User", b =>
@@ -82,8 +139,8 @@ namespace AuthenticationService.App.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("registered_at");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
                         .HasColumnName("role_id");
 
                     b.HasKey("Id");
@@ -97,6 +154,17 @@ namespace AuthenticationService.App.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("user", (string)null);
+                });
+
+            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("AuthenticationService.App.Domain.Entities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AuthenticationService.App.Domain.Entities.User", b =>
@@ -113,6 +181,11 @@ namespace AuthenticationService.App.Infrastructure.Migrations
             modelBuilder.Entity("AuthenticationService.App.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.User", b =>
+                {
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

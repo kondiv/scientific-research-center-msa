@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuthenticationService.App.Infrastructure.Migrations
 {
     [DbContext(typeof(AuthServiceContext))]
-    [Migration("20251025181002_RegistrationCode")]
-    partial class RegistrationCode
+    [Migration("20251026134346_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,63 +25,48 @@ namespace AuthenticationService.App.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.RegistrationCode", b =>
+            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("email");
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at");
 
-                    b.Property<string>("FullName")
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
-                        .HasColumnName("full_name");
+                        .HasColumnName("token");
 
-                    b.Property<string>("HashRegistrationCode")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("hash_registration_code");
-
-                    b.Property<string>("Login")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("login");
-
-                    b.Property<string>("NormalizedRoleName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("normalized_role_name");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("used_at");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
-                    b.ToTable("registration_code", (string)null);
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("refresh_token", (string)null);
                 });
 
             modelBuilder.Entity("AuthenticationService.App.Domain.Entities.Role", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -101,6 +86,26 @@ namespace AuthenticationService.App.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("role", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Scientist",
+                            NormalizedName = "SCIENTIST"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Technical Specialist",
+                            NormalizedName = "TECHNICAL_SPECIALIST"
+                        });
                 });
 
             modelBuilder.Entity("AuthenticationService.App.Domain.Entities.User", b =>
@@ -137,15 +142,32 @@ namespace AuthenticationService.App.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("registered_at");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
                         .HasColumnName("role_id");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Login")
+                        .IsUnique();
+
                     b.HasIndex("RoleId");
 
                     b.ToTable("user", (string)null);
+                });
+
+            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("AuthenticationService.App.Domain.Entities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AuthenticationService.App.Domain.Entities.User", b =>
@@ -162,6 +184,11 @@ namespace AuthenticationService.App.Infrastructure.Migrations
             modelBuilder.Entity("AuthenticationService.App.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("AuthenticationService.App.Domain.Entities.User", b =>
+                {
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

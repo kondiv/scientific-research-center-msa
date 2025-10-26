@@ -2,17 +2,21 @@
 
 internal sealed class Role
 {
-    public Guid Id { get; private init; }
-    
-    public string Name { get; private set; }
-    
-    public string NormalizedName { get; private set; }
+    public int Id { get; init; }
+
+    public string Name { get; set; } = null!;
+
+    public string NormalizedName { get; set; } = null!;
 
     public ICollection<User> Users { get; private set; } = [];
 
+    public Role()
+    {
+        
+    }
+
     public Role(string name)
     {
-        Id = Guid.NewGuid();
         Name = name;
         NormalizedName = name.ToUpper();
     }

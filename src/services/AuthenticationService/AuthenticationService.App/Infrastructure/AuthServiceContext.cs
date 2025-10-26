@@ -9,6 +9,8 @@ internal sealed class AuthServiceContext : DbContext
 
     public DbSet<Role> Roles => Set<Role>();
     
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    
     public AuthServiceContext(DbContextOptions<AuthServiceContext> options) 
         : base(options)
     {
