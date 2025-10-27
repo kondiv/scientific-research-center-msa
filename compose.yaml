@@ -1,13 +1,38 @@
 services:
 
+  gateway:
+    image: yarp-gateway:latest
+    build:
+      context: .
+      dockerfile: ./gateway/Gateway/Gateway/Dockerfile
+    environment:
+      DOTNET_RUNNING_IN_CONTAINER: true
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:4999;https://+:5000
+      Kestrel__Endpoints__Https__Url: https://+:5000
+      Kestrel__Endpoints__Https__Certificate__Path: ${CERTS_PATH}
+      Kestrel__Endpoints__Https__Certificate__Password: ${CERTS_PASSWORD}
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__Key: ${JWT_KEY}
+    ports:
+      - "4999:4999"
+      - "5000:5000"
+    networks:
+      - public
+      - internal
+    volumes:
+      - ./certs/:/app/certs:ro
+
   authentication-service:
     image: authentication-service:latest
     build: 
       context: .
       dockerfile: ./src/services/AuthenticationService/AuthenticationService.App/Dockerfile
     environment:
-      ASPNETCORE_URLS: http://+:5000
+      DOTNET_RUNNING_IN_CONTAINER: true
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5001
       ConnectionStrings__DefaultConnection: "Host=authentication-service-database;Port=5432;Database=auth_db;Username=developer;Password=${AUTH_DB_PASSWORD}"
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
@@ -15,9 +40,9 @@ services:
       Jwt__AccessTokenLifetime: ${JWT_ACCESSTOKENLIFETIME}
       Jwt__RefreshTokenLifetime: ${JWT_REFRESHTOKENLIFETIME}
     expose:
-      - 5000
+      - 5001
     ports:
-      - "5000:5000"
+      - "5001:5001"
     networks:
       - public
       - auth-internal
@@ -50,6 +75,9 @@ networks:
 
   public:
     internal: false
+
+  internal:
+    internal: true
 
   auth-internal:
     internal: true  
