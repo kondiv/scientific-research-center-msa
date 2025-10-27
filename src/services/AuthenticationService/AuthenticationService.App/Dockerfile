@@ -1,16 +1,15 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["AuthenticationService.App/AuthenticationService.App.csproj", "AuthenticationService.App/"]
-RUN dotnet restore "AuthenticationService.App/AuthenticationService.App.csproj"
+COPY ["src/services/AuthenticationService/AuthenticationService.App/AuthenticationService.App.csproj", "src/services/AuthenticationService/AuthenticationService.App/"]
+COPY ["src/shared/Shared/Shared.ResultPattern/Shared.ResultPattern.csproj", "src/shared/Shared/Shared.ResultPattern/"]
+RUN dotnet restore "src/services/AuthenticationService/AuthenticationService.App/AuthenticationService.App.csproj"
 COPY . .
-WORKDIR "/src/AuthenticationService.App"
+WORKDIR "/src/src/services/AuthenticationService/AuthenticationService.App"
 RUN dotnet build "./AuthenticationService.App.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Auth", "Shared.Auth\Shared.Auth.csproj", "{F15681CD-4EA8-4595-8622-454B795BBAA8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.ResultPattern", "Shared.ResultPattern\Shared.ResultPattern.csproj", "{E4C8093C-BCF2-40E0-BC6C-ACFC70FC1214}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.ResultPattern", "Shared.ResultPattern\Shared.ResultPattern.csproj", "{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,13 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F15681CD-4EA8-4595-8622-454B795BBAA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F15681CD-4EA8-4595-8622-454B795BBAA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F15681CD-4EA8-4595-8622-454B795BBAA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F15681CD-4EA8-4595-8622-454B795BBAA8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E4C8093C-BCF2-40E0-BC6C-ACFC70FC1214}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4C8093C-BCF2-40E0-BC6C-ACFC70FC1214}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4C8093C-BCF2-40E0-BC6C-ACFC70FC1214}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4C8093C-BCF2-40E0-BC6C-ACFC70FC1214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
