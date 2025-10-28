@@ -1,0 +1,10 @@
+namespace Shared.ResultPattern.Errors;
+
+public class DbUpdateError : Error
+{
+    public DbUpdateError(string message)
+        : base(message)
+    {
+        ErrorCode = ErrorCode.DbUpdate;
+    }
+}
