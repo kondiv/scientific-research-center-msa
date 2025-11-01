@@ -9,5 +9,6 @@ public enum ErrorCode
     Conflict,
     AlreadyExists,
     AuthProblem,
-    Validation
+    Validation,
+    CloudStorage
 }
