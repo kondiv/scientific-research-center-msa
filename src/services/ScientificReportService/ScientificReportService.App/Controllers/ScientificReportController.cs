@@ -1,12 +1,19 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ScientificReportService.App.ApiRequests;
+using ScientificReportService.App.Domain.Entities;
 using ScientificReportService.App.Domain.Models;
 using ScientificReportService.App.Features.CreateReport;
+using ScientificReportService.App.Features.DeleteReport;
+using ScientificReportService.App.Features.DownloadReport;
+using ScientificReportService.App.Features.GetReportAuthor;
+using ScientificReportService.App.Features.ListReports;
+using Shared.ResultPattern.Errors;
 
 namespace ScientificReportService.App.Controllers;
 
 [ApiController]
+[Route("reports")]
 public class ScientificReportController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -23,7 +30,7 @@ public class ScientificReportController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var command = new CreateReportCommand(file, request.Title, request.Description, request.Author,
-            request.Tags);
+            request.AuthorId, request.Tags);
         
         var result = await _mediator.Send(command, cancellationToken);
 
@@ -38,20 +45,75 @@ public class ScientificReportController : ControllerBase
     }
 
     [HttpGet("download/{fileId}", Name = "DownloadFile")]
-    public async Task<IActionResult> DownloadFile(string fileId)
+    public async Task<ActionResult<Stream>> DownloadFile([FromRoute] string fileId,
+        CancellationToken cancellationToken = default)
     {
-        return StatusCode(405);
+        var request = new DownloadReportRequest(fileId);
+        
+        var result = await _mediator.Send(request, cancellationToken);
+        
+        if (result.Succeeded)
+        {
+            return File(result.Value.FileStream, result.Value.ContentType, result.Value.FileName);
+        }
+        
+        return result.Error.ErrorCode switch
+        {
+            ErrorCode.NotFound => NotFound(result.Error.Message),
+            _ => BadRequest(result.Error.Message)
+        };
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<ScientificReport>>> ListAsync(
+        int page = 1,
+        int maxPageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new ListReportsRequest(page, maxPageSize);
+        
+        var result = await _mediator.Send(request, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpGet("{id}/author")]
+    public async Task<ActionResult<Author>> GetAuthorAsync(
+        [FromRoute] string id,
+        CancellationToken cancellationToken)
+    {
+        var request = new GetReportAuthorRequest(id);
+
+        var result = await _mediator.Send(request, cancellationToken);
+
+        if (result.Succeeded)
+        {
+            return Ok(result.Value);
+        }
+
+        return result.Error.ErrorCode switch
+        {
+            ErrorCode.NotFound => NotFound(result.Error.Message),
+            _ => BadRequest(result.Error.Message)
+        };
     }
     
-    [HttpGet("info/{fileId}")]
-    public async Task<ActionResult<FileInfoResult>> GetFileInfo(string fileId)
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteFile([FromRoute] string id, CancellationToken cancellationToken = default)
     {
-        return StatusCode(405);
-    }
-    
-    [HttpDelete("{fileId}")]
-    public async Task<ActionResult> DeleteFile(string fileId)
-    {
-        return StatusCode(405);
+        var command = new DeleteReportCommand(id);
+
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.Succeeded)
+        {
+            return NoContent();
+        }
+
+        return result.Error.ErrorCode switch
+        {
+            ErrorCode.NotFound => NotFound(result.Error.Message),
+            _ => BadRequest(result.Error.Message)
+        };
     }
 }

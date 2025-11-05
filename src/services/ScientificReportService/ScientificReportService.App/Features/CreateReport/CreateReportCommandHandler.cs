@@ -32,12 +32,14 @@ internal sealed class CreateReportCommandHandler : IRequestHandler<CreateReportC
             request.Title,
             request.Description,
             request.Author,
+            request.AuthorId,
             request.Tags);
 
         var result = await _fileStorage.Upload(request.File, request.Author, cancellationToken);
 
         if (result.IsFailure)
         {
+            _logger.LogError(result.InnerException, "Error while uploading file to cloud storage.");
             return result;
         }
         
@@ -53,9 +55,10 @@ internal sealed class CreateReportCommandHandler : IRequestHandler<CreateReportC
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
+            _logger.LogError(e, "Error while saving entity to database. Deleting file from cloud storage.");
             await _fileStorage.Delete(result.Value.FileId);
             return Result<UploadFileResult>.Failure(
-                new DbUpdateError($"Cannot add report \nReason: {e.Message}"));
+                new DbUpdateError($"Cannot add report to the database \nReason: {e.Message}"));
         }
     }
 }

@@ -34,6 +34,12 @@ namespace ScientificReportService.App.Infrastructure.Migrations
                         .HasColumnType("character varying(512)")
                         .HasColumnName("author");
 
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("author_id");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1024)

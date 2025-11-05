@@ -1,4 +1,6 @@
-﻿using Amazon.S3;
+﻿using System.Net;
+using System.Text;
+using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
 using ScientificReportService.App.Common;
@@ -47,8 +49,8 @@ public class YandexCloudFileStorage : IFileStorage
             ContentType = file.ContentType
         };
         
-        putRequest.Metadata.Add("original-filename", file.FileName);
-        putRequest.Metadata.Add("uploaded-by", uploadedBy ?? "anonymous");
+        putRequest.Metadata.Add("original-filename", Convert.ToBase64String(Encoding.UTF8.GetBytes(file.FileName)));
+        putRequest.Metadata.Add("uploaded-by", Convert.ToBase64String(Encoding.UTF8.GetBytes(uploadedBy)) ?? "anonymous");
         putRequest.Metadata.Add("content-type", file.ContentType);
         putRequest.Metadata.Add("uploaded-at", DateTime.UtcNow.ToString("O"));
 
@@ -71,7 +73,7 @@ public class YandexCloudFileStorage : IFileStorage
         catch (Exception e) when (e is not OperationCanceledException or TaskCanceledException) 
         {
             return Result<UploadFileResult>.Failure(
-                new CloudStorageError("Cannot upload file. Try again later"));
+                new CloudStorageError("Cannot upload file. Try again later"), e);
         }
     }
 
@@ -88,9 +90,15 @@ public class YandexCloudFileStorage : IFileStorage
         try
         {
             var response = await _client.GetObjectAsync(request, cancellationToken);
+
+            if (response.HttpStatusCode == HttpStatusCode.NotFound)
+            {
+                return Result<Stream>.Failure(new NotFoundError("Object does not exist"));
+            }
+            
             return Result<Stream>.Success(response.ResponseStream);
         }
-        catch (Exception)
+        catch (Exception e) when (e is not OperationCanceledException or TaskCanceledException)
         {
             return Result<Stream>.Failure(new CloudStorageError("Cannot download file. Try again later"));
         }
@@ -113,7 +121,7 @@ public class YandexCloudFileStorage : IFileStorage
         }
         catch (Exception e) when (e is not OperationCanceledException or TaskCanceledException)
         {
-            return Result.Failure(new CloudStorageError("Cannot delete file. Try again later"));
+            return Result.Failure(new CloudStorageError("Cannot delete file. Try again later"), e);
         }
     }
 
@@ -140,7 +148,7 @@ public class YandexCloudFileStorage : IFileStorage
             {
                 ContentType = result.ContentType,
                 FileId = fileId,
-                FileName = result.Metadata["original-filename"],
+                FileName = Encoding.UTF8.GetString(Convert.FromBase64String(result.Metadata["original-filename"])),
                 Size = result.Headers.ContentLength,
                 UploadedAt = DateTime.Parse(result.Metadata["uploaded-at"])
             });

@@ -18,6 +18,10 @@ public class ScientificReportConfiguration : IEntityTypeConfiguration<Scientific
         builder.Property(x => x.Id)
             .ValueGeneratedNever()
             .HasColumnName("id");
+
+        builder.Property(x => x.AuthorId)
+            .HasMaxLength(64)
+            .HasColumnName("author_id");
         
         builder.Property(x => x.Title)
             .HasMaxLength(128)

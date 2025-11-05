@@ -9,9 +9,10 @@ public sealed class ScientificReport
     public DateTime LastUpdatedAt { get; private set; }
     public string StorageFileId { get; private set; } = null!;
     public string Author { get; private init; }
+    public string AuthorId { get; private init; }
     public string Tags { get; private set; }
 
-    public ScientificReport(string title, string description, string author, string tags)
+    public ScientificReport(string title, string description, string author, string authorId, string tags)
     {
         Id = Guid.NewGuid();
         Title = title;
@@ -19,6 +20,7 @@ public sealed class ScientificReport
         PublishedAt = DateTime.UtcNow;
         LastUpdatedAt = DateTime.UtcNow;
         Author = author;
+        AuthorId = authorId;
         Tags = tags;
     }
 

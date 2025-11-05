@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using Gateway.Requirements;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Gateway.Extensions;
@@ -56,6 +58,17 @@ public static class DependencyInjection
     {
         services.AddAuthorizationBuilder()
             .AddPolicy("Admin", policy => policy.RequireRole("ADMIN"));
+        
+        services.AddAuthorizationBuilder()
+            .AddPolicy("Scientist", policy => policy.RequireRole("SCIENTIST", "ADMIN"));
+
+        services.AddAuthorizationBuilder()
+            .AddPolicy("ReportOwner", policy => 
+                policy
+                    .RequireRole("ADMIN")
+                    .AddRequirements(new ReportOwnerRequirement()));
+
+        services.AddTransient<IAuthorizationHandler, ReportOwnerRequirementHandler>();
 
         return services;
     }
