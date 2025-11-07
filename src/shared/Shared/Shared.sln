@@ -1,6 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36623.8 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.ResultPattern", "Shared.ResultPattern\Shared.ResultPattern.csproj", "{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Contracts", "Shared.Contracts\Shared.Contracts.csproj", "{AB312180-E757-4B0E-8390-75C2DDD92F2E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +17,15 @@ Global
 		{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25630A1C-9CC3-4AD8-AA5D-5142E04F8447}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB312180-E757-4B0E-8390-75C2DDD92F2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB312180-E757-4B0E-8390-75C2DDD92F2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB312180-E757-4B0E-8390-75C2DDD92F2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB312180-E757-4B0E-8390-75C2DDD92F2E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {785088C4-DC26-4939-AA5C-2C2F13C78375}
 	EndGlobalSection
 EndGlobal
