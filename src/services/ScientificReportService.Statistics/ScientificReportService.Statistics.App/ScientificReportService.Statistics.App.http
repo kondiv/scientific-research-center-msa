@@ -1,0 +1,6 @@
+@ScientificReportService.Statistics.App_HostAddress = http://localhost:5224
+
+GET {{ScientificReportService.Statistics.App_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,17 +1,11 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using ScientificReportService.App.Common;
-using ScientificReportService.App.Domain.Configurations;
-using ScientificReportService.App.Infrastructure;
-using ScientificReportService.App.Infrastructure.CloudStorage;
+using ScientificReportService.Statistics.App.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ScientificReportDbContext>(options =>
+builder.Services.AddDbContext<ReportsStatisticsContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddMediatR(options => 
-    options.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddMassTransit(busConfigurator =>
 {
@@ -28,10 +22,6 @@ builder.Services.AddMassTransit(busConfigurator =>
         configurator.ConfigureEndpoints(context);
     });
 });
-
-builder.Services.Configure<YandexCloudSettings>(builder.Configuration.GetSection("YandexCloud"));
-
-builder.Services.AddScoped<IFileStorage, YandexCloudFileStorage>();
 
 builder.Services.AddControllers();
 
