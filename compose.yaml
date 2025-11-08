@@ -56,6 +56,9 @@ services:
       context: .
       dockerfile: src/services/ScientificReportService/ScientificReportService.App/Dockerfile
     environment:
+      - MessageBroker__Host=amqp://reports-mq:5672
+      - MessageBroker__Username=developer
+      - MessageBroker__Password=${RABBITMQ_DEFAULT_PASSWORD}
       - YandexCloud__BucketName=${YANDEX_CLOUD_SCIENTIFIC_REPORT_SERVICE_BUCKET_NAME}
       - YandexCloud__Url=${YANDEX_CLOUD_URL}
       - YandexCloud__AccessKey=${YANDEX_CLOUD_ACCESS_KEY}
@@ -76,7 +79,50 @@ services:
     depends_on:
       scientific-reports-service-database:
         condition: service_healthy
-    
+
+  reports-statistics-service:
+    image: reports-statistics-service:latest
+    build: 
+      context: .
+      dockerfile: src/services/ScientificReportService.Statistics/ScientificReportService.Statistics.App/Dockerfile
+    environment:
+      - MessageBroker__Host=amqp://reports-mq:5672
+      - MessageBroker__Username=developer
+      - MessageBroker__Password=${RABBITMQ_DEFAULT_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5003
+      - ConnectionStrings__DefaultConnection=Host=scientific-reports-statistics-database;Port=5432;Database=reports-statistics;Username=developer;Password=${SCIENTIFIC_REPORTS_STATS_DB_PASSWORD}
+      - DOTNET_RUNNING_IN_CONTAINER=true
+    expose:
+      - 5003
+    ports:
+      - "5003:5003"
+    networks:
+      - public
+      - internal
+      - scientific-reports-stats-internal
+    depends_on:
+      scientific-reports-statistics-database:
+        condition: service_healthy
+  
+  reports-mq:
+    image: rabbitmq:management
+    environment:
+      - RABBITMQ_DEFAULT_USER=developer
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASSWORD}
+    volumes:
+      - reports-mq-data:/var/lib/rabbitmq
+    networks:
+      - public
+      - internal
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3  
 
   authentication-service-database:
     image: postgres:latest
@@ -120,6 +166,28 @@ services:
       retries: 5
       start_period: 20s
 
+  scientific-reports-statistics-database:
+    image: postgres:latest
+    container_name: scientific-reports-stats-db
+    environment:
+      - POSTGRES_USER=developer
+      - POSTGRES_DB=reports-statistics
+      - POSTGRES_PASSWORD=${SCIENTIFIC_REPORTS_STATS_DB_PASSWORD}
+    volumes:
+      - scientific-reports-stats-db:/var/lib/postgresql/data/
+    networks:
+      - public
+      - scientific-reports-stats-internal
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U developer -d reports-statistics"]
+      interval: 10s
+      timeout: 20s
+      retries: 5
+      start_period: 20s
+      
+
     
 networks:
 
@@ -134,7 +202,12 @@ networks:
 
   scientific-reports-internal:
     internal: true  
+  
+  scientific-reports-stats-internal:
+    internal: true  
 
 volumes:
   auth-db: 
-  scientific-reports-db: 
+  scientific-reports-db:
+  scientific-reports-stats-db: 
+  reports-mq-data:
