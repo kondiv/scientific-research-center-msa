@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using ScientificReportService.Statistics.App.Features.Articles;
 using ScientificReportService.Statistics.App.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ builder.Services.AddDbContext<ReportsStatisticsContext>(options =>
 builder.Services.AddMassTransit(busConfigurator =>
 {
     busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+    busConfigurator.AddConsumer<ReportUploaded>();
 
     busConfigurator.UsingRabbitMq((context, configurator) =>
     {

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScientificReportService.Statistics.App.Infrastructure;
@@ -11,9 +12,11 @@ using ScientificReportService.Statistics.App.Infrastructure;
 namespace ScientificReportService.Statistics.App.Infrastructure.Migrations
 {
     [DbContext(typeof(ReportsStatisticsContext))]
-    partial class ReportsStatisticsContextModelSnapshot : ModelSnapshot
+    [Migration("20251108113253_AddReportAndChangeStatisticsTableName")]
+    partial class AddReportAndChangeStatisticsTableName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,17 +58,17 @@ namespace ScientificReportService.Statistics.App.Infrastructure.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("action");
 
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date");
 
-                    b.Property<Guid>("ReportId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("report_id");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ReportId");
+                    b.HasIndex("ArticleId");
 
                     b.ToTable("report_event", (string)null);
                 });
@@ -74,7 +77,7 @@ namespace ScientificReportService.Statistics.App.Infrastructure.Migrations
                 {
                     b.HasOne("ScientificReportService.Statistics.App.Domain.Entities.Report", null)
                         .WithMany("ReportEvents")
-                        .HasForeignKey("ReportId")
+                        .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

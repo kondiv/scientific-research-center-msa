@@ -4,17 +4,16 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-
 
 # Этот этап используется для сборки проекта службы
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["ScientificReportService.Statistics.App/ScientificReportService.Statistics.App.csproj", "ScientificReportService.Statistics.App/"]
-RUN dotnet restore "./ScientificReportService.Statistics.App/ScientificReportService.Statistics.App.csproj"
+COPY ["src/services/ScientificReportService.Statistics/ScientificReportService.Statistics.App/ScientificReportService.Statistics.App.csproj", "src/services/ScientificReportService.Statistics/ScientificReportService.Statistics.App/"]
+COPY ["src/shared/Shared/Shared.Contracts/Shared.Contracts.csproj", "src/shared/Shared/Shared.Contracts/"]
+RUN dotnet restore "src/services/ScientificReportService.Statistics/ScientificReportService.Statistics.App/ScientificReportService.Statistics.App.csproj"
 COPY . .
-WORKDIR "/src/ScientificReportService.Statistics.App"
+WORKDIR "/src/src/services/ScientificReportService.Statistics/ScientificReportService.Statistics.App"
 RUN dotnet build "./ScientificReportService.Statistics.App.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Этот этап используется для публикации проекта службы, который будет скопирован на последний этап
