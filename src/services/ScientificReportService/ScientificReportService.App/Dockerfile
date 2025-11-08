@@ -7,6 +7,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/services/ScientificReportService/ScientificReportService.App/ScientificReportService.App.csproj", "src/services/ScientificReportService/ScientificReportService.App/"]
 COPY ["src/shared/Shared/Shared.ResultPattern/Shared.ResultPattern.csproj", "src/shared/Shared/Shared.ResultPattern/"]
+COPY ["src/shared/Shared/Shared.Contracts/Shared.Contracts.csproj", "src/shared/Shared/Shared.Contracts/"]
 RUN dotnet restore "src/services/ScientificReportService/ScientificReportService.App/ScientificReportService.App.csproj"
 COPY . .
 WORKDIR "/src/src/services/ScientificReportService/ScientificReportService.App"

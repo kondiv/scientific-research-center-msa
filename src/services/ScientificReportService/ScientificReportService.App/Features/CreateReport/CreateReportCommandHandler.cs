@@ -1,8 +1,10 @@
-﻿using MediatR;
+﻿using MassTransit;
+using MediatR;
 using ScientificReportService.App.Common;
 using ScientificReportService.App.Domain.Entities;
 using ScientificReportService.App.Domain.Models;
 using ScientificReportService.App.Infrastructure;
+using Shared.Contracts.ReportEvents;
 using Shared.ResultPattern;
 using Shared.ResultPattern.Errors;
 
@@ -12,15 +14,18 @@ internal sealed class CreateReportCommandHandler : IRequestHandler<CreateReportC
 {
     private readonly ScientificReportDbContext _context;
     private readonly IFileStorage _fileStorage;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<CreateReportCommandHandler> _logger;
 
     public CreateReportCommandHandler(
         ScientificReportDbContext context,
         IFileStorage fileStorage,
+        IPublishEndpoint publishEndpoint,
         ILogger<CreateReportCommandHandler> logger)
     {
         _context = context;
         _fileStorage = fileStorage;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -50,6 +55,8 @@ internal sealed class CreateReportCommandHandler : IRequestHandler<CreateReportC
         try
         {
             await _context.SaveChangesAsync(cancellationToken);
+
+            await _publishEndpoint.Publish(new ReportCreatedEvent(scientificReport.Id, scientificReport.Title, DateTime.UtcNow));
 
             return result;
         }

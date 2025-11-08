@@ -1,7 +1,9 @@
-﻿using MediatR;
+﻿using MassTransit;
+using MediatR;
 using ScientificReportService.App.Common;
 using ScientificReportService.App.Domain.Errors;
 using ScientificReportService.App.Domain.ValueTypes;
+using Shared.Contracts.ReportEvents;
 using Shared.ResultPattern;
 
 namespace ScientificReportService.App.Features.DownloadReport;
@@ -9,11 +11,16 @@ namespace ScientificReportService.App.Features.DownloadReport;
 internal sealed class DownloadReportRequestHandler : IRequestHandler<DownloadReportRequest, Result<FileData>>
 {
     private readonly IFileStorage _fileStorage;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<DownloadReportRequestHandler> _logger;
 
-    public DownloadReportRequestHandler(IFileStorage fileStorage, ILogger<DownloadReportRequestHandler> logger)
+    public DownloadReportRequestHandler(
+        IFileStorage fileStorage, 
+        IPublishEndpoint publishEndpoint,
+        ILogger<DownloadReportRequestHandler> logger)
     {
         _fileStorage = fileStorage;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -36,6 +43,8 @@ internal sealed class DownloadReportRequestHandler : IRequestHandler<DownloadRep
             _logger.LogError("Cannot get file information from cloud storage. Reason: {reason}", getFileInfoResult.Error.Message);
             return Result<FileData>.Failure(new CloudStorageError(getFileInfoResult.Error.Message));
         }
+
+        await _publishEndpoint.Publish(new ReportDownloadedEvent(Guid.Parse(request.FileId), DateTime.UtcNow));
 
         return Result<FileData>.Success(
             new FileData(

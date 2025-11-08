@@ -1,7 +1,8 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using MediatR;
 using ScientificReportService.App.Common;
 using ScientificReportService.App.Infrastructure;
+using Shared.Contracts.ReportEvents;
 using Shared.ResultPattern;
 using Shared.ResultPattern.Errors;
 
@@ -11,16 +12,19 @@ internal sealed class DeleteReportCommandHandler : IRequestHandler<DeleteReportC
 {
     private readonly ScientificReportDbContext _context;
     private readonly IFileStorage _fileStorage;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<DeleteReportCommandHandler> _logger;
 
     public DeleteReportCommandHandler(
         IFileStorage fileStorage,
         ILogger<DeleteReportCommandHandler> logger,
-        ScientificReportDbContext context)
+        ScientificReportDbContext context,
+        IPublishEndpoint publishEndpoint)
     {
         _fileStorage = fileStorage;
         _logger = logger;
         _context = context;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<Result> Handle(DeleteReportCommand request, CancellationToken cancellationToken)
@@ -53,6 +57,8 @@ internal sealed class DeleteReportCommandHandler : IRequestHandler<DeleteReportC
 
         _context.Remove(report);
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _publishEndpoint.Publish(new ReportDeletedEvent(report.Id, DateTime.UtcNow));
         
         return Result.Success();
     }
